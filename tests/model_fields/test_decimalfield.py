@@ -49,6 +49,17 @@ class DecimalFieldTests(TestCase):
         bd = BigD.objects.get(pk=bd.pk)
         self.assertEqual(bd.d, Decimal('12.9'))
 
+    def test_save_with_max_digits_overflow(self):
+        """
+        Ensure overflowing decimals yield a meaningful error.
+        """
+        overflowing_value = Decimal(10 ** 6)
+        expected_message = "Not enough digit positions in field 'd' to represent {}".format(overflowing_value) # some meaningful error message
+        overflowing_instance = Foo(a='a', d=overflowing_value)
+        with self.assertRaisesMessage(ValidationError, # some meaningful error
+            expected_message):
+            overflowing_instance.save()
+
     def test_lookup_really_big_value(self):
         """
         Really big values can be used in a filter statement.
